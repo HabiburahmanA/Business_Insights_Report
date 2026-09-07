@@ -307,7 +307,7 @@ function crossHeatmapHtml(crossData, rowVals, colVals, rowLabelFn, colLabelFn) {
   return `<div class="table-scroll"><table class="ledger heatmap"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
 }
 
-/* ---- Chart.js wrappers (each degrades gracefully if the CDN failed) ---- */
+/* ---- Chart.js wrappers (each degrades gracefully if the local bundle is unavailable) ---- */
 function barChart(canvasId, labels, values, opts) {
   destroyChart(canvasId);
   const el = document.getElementById(canvasId);

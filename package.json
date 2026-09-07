@@ -7,7 +7,8 @@
     "node": ">=18"
   },
   "scripts": {
-    "build": "npm run build:js && npm run build:css",
+    "build": "npm run build:vendor && npm run build:js && npm run build:css",
+    "build:vendor": "node -e \"const fs=require('fs'); fs.mkdirSync('dist/vendor',{recursive:true}); fs.copyFileSync('node_modules/chart.js/dist/chart.umd.js','dist/vendor/chart.umd.js')\"",
     "build:js": "terser src/app.js --compress drop_debugger=true,passes=2 --mangle --format comments=false --output dist/app.min.js",
     "build:css": "cleancss -o dist/styles.min.css src/styles.css",
     "test": "node test/blackbox.test.js",
@@ -16,5 +17,8 @@
   "devDependencies": {
     "clean-css-cli": "^5.6.3",
     "terser": "^5.51.2"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.4"
   }
 }

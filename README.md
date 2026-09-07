@@ -40,6 +40,7 @@ src/
 dist/
   app.min.js             Built/minified — what index.html actually loads
   styles.min.css          Built/minified
+  vendor/chart.umd.js     Locally bundled Chart.js — no chart CDN required
 api/
   ai-insights.js          Vercel serverless function — the AI proxy
 samples/
@@ -60,6 +61,9 @@ npm install
 npm run build      # builds dist/ from src/
 npm run preview    # serves the folder at localhost — everything works except /api
 ```
+
+The build copies Chart.js from the installed `chart.js` package into
+`dist/vendor/`, so charts work even when the browser cannot reach a CDN.
 
 To test the AI Insights feature locally, you need Vercel's dev server
 instead, since it's the only thing that runs the `/api` function:
