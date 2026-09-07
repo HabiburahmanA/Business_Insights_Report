@@ -1,132 +1,232 @@
 # Business Insights Report
 
-Upload any CSV and get an automatic business report: KPIs, trends, category
-breakdowns, correlations, and rule-based findings — plus an optional
-AI-written narrative. Column types and business roles (currency, quantity,
-date, category, identifier) are detected automatically from the data, so
-this works with sales data, HR records, operations logs, or anything else
-shaped like a spreadsheet.
+A lightweight, client-first business intelligence tool for exploring CSV data and turning raw spreadsheets into actionable insights. Upload any structured dataset and the app automatically identifies business-relevant column types, calculates KPIs, highlights trends, surfaces correlations, and flags rule-based findings.
 
-Everything runs client-side in the browser. The one exception is the
-optional "Generate AI Insights" button, which calls a small server-side
-function so your Anthropic API key is never exposed to visitors.
+This project is designed for analysts, operations teams, product managers, and anyone working with spreadsheet-style data who wants fast, readable insights without setting up a full BI stack.
 
-## Quick deploy (Vercel)
+## Overview
 
-```
-npm install -g vercel   # if you don't already have it
-vercel
-```
+Business Insights Report helps users turn CSV files into a polished business summary with:
 
-Follow the prompts, then in the Vercel dashboard go to **Project Settings →
-Environment Variables** and add `ANTHROPIC_API_KEY` (see
-[AI Insights setup](#ai-insights-setup) below). Redeploy after adding it.
+- KPI summaries and metric overviews
+- Trend analysis across time-based data
+- Category breakdowns and distribution insights
+- Correlation analysis between numeric fields
+- Rule-based findings and anomaly detection
+- Optional AI-generated narrative summaries using Anthropic
+- Strict data-quality validation before any analysis runs
 
-Any static host (Netlify, GitHub Pages, S3 + CloudFront, Cloudflare Pages,
-etc.) will serve the site itself just fine — `index.html`, `dist/`, and
-`samples/` are plain static files. The `/api/ai-insights` function is
-written for Vercel's zero-config Node.js runtime specifically; on another
-host you'd need to adapt it to that platform's function format (or the
-button will just show a friendly "unavailable" message instead of an error,
-since the front end already handles that failure gracefully).
+The app runs entirely in the browser for normal report generation. The only exception is the optional AI narrative feature, which is proxied through a serverless function so the Anthropic API key stays on the backend and is never exposed to end users.
+
+## Why this project exists
+
+Many spreadsheet workflows require domain knowledge, formatting cleanup, and manual interpretation before trends or issues become visible. This project reduces that friction by:
+
+- detecting business roles automatically from column names and data patterns
+- validating input quality before processing
+- summarizing the most important signals in a single report
+- supporting a wide range of datasets such as sales, HR, inventory, and operations data
+
+## Features
+
+### Automated data inspection
+
+The app inspects uploaded CSVs and infers the likely business role of each field, including:
+
+- currency
+- quantity
+- date
+- category
+- identifier
+
+This allows the same analysis engine to work across different business domains without custom coding for each dataset.
+
+### Business analysis output
+
+After upload, the report can include:
+
+- KPI metrics such as totals, averages, minima, and maxima
+- time-based trend analysis
+- category and segment breakdowns
+- relationship analysis between variables
+- concrete business rules and exception flags
+- optional narrative insight summaries
+
+### Data-quality gate
+
+Before any analysis begins, the app validates the dataset for blank cells. If incomplete records are found, processing stops and a detailed rejection screen shows:
+
+- which columns are affected
+- how many blank values were found
+- the percentage of rows impacted
+- a row-by-row log of exact occurrences
+
+This helps users fix source data precisely instead of guessing.
+
+### AI-powered optional insights
+
+The Findings tab offers an optional generated summary that sends only a compact metadata snapshot — not raw file contents — to the backend API, which then forwards the request to Anthropic securely.
+
+If no API key is configured, the UI still works normally and shows a clear message explaining that the AI feature is unavailable.
+
+## Tech stack
+
+- Frontend: vanilla JavaScript, HTML, CSS
+- Visualization: Chart.js
+- Build tooling: npm scripts and local bundling
+- Backend: Vercel serverless function
+- AI integration: Anthropic API
 
 ## Project structure
 
-```
-index.html              Entry point — references the built files in dist/
-src/
-  app.js                Readable source — the whole app, one file
-  styles.css             Readable source CSS
-dist/
-  app.min.js             Built/minified — what index.html actually loads
-  styles.min.css          Built/minified
-  vendor/chart.umd.js     Locally bundled Chart.js — no chart CDN required
-api/
-  ai-insights.js          Vercel serverless function — the AI proxy
-samples/
-  sample-retail-sales.csv       220 rows — trends, categories, correlations
-  sample-hr-headcount.csv       150 rows — a different domain, same engine
-  sample-with-blank-cells.csv   10 rows, 4 deliberate blanks — try the gate
-test/
-  blackbox.test.js         End-to-end test driven through the actual dist/app.min.js
-package.json, vercel.json, .gitignore, .env.example
+```text
+.
+├── index.html                 Entry point; loads the built static assets
+├── package.json               Project scripts and dependencies
+├── vercel.json                Vercel deployment configuration
+├── README.md                  Project documentation
+├── .env.example               Example environment variable file for AI setup
+├── api/
+│   └── ai-insights.js         Vercel serverless function for AI proxying
+├── src/
+│   ├── app.js                 Main application logic
+│   └── styles.css             Application styling
+├── dist/
+│   ├── app.min.js             Built app bundle used by the browser
+│   ├── styles.min.css         Built CSS bundle
+│   └── vendor/
+│       └── chart.umd.js      Bundled Chart.js dependency
+├── samples/
+│   ├── sample-retail-sales.csv
+│   ├── sample-hr-headcount.csv
+│   └── sample-with-blank-cells.csv
+├── test/
+│   └── blackbox.test.js       End-to-end browser-driven test suite
+└── .gitignore
 ```
 
-`src/` is what you edit. `dist/` is generated — never hand-edit it.
+Note: the source files live in `src/`, while `dist/` is generated at build time and should not be edited manually.
 
-## Local development
+## Getting started
 
-```
+### Install dependencies
+
+```bash
 npm install
-npm run build      # builds dist/ from src/
-npm run preview    # serves the folder at localhost — everything works except /api
 ```
 
-The build copies Chart.js from the installed `chart.js` package into
-`dist/vendor/`, so charts work even when the browser cannot reach a CDN.
+### Build the app
 
-To test the AI Insights feature locally, you need Vercel's dev server
-instead, since it's the only thing that runs the `/api` function:
-
+```bash
+npm run build
 ```
-cp .env.example .env.local     # then fill in your real key
+
+This creates the production-ready static assets in `dist/` from the source files in `src/`.
+
+### Preview locally
+
+```bash
+npm run preview
+```
+
+This serves the app locally in the browser. The frontend will function normally, but the `/api` route is not available unless you run the Vercel development server.
+
+## Local development with AI features
+
+To test AI-generated insights locally, you must use Vercel's local runtime because it is the environment providing the `/api/ai-insights` function.
+
+```bash
+cp .env.example .env.local
 vercel dev
 ```
 
-After editing `src/app.js` or `src/styles.css`, run `npm run build` again —
-`index.html` loads the built files, not the source files directly.
+Then add your real Anthropic API key to the local environment file before starting Vercel.
+
+## Deployment
+
+### Vercel (recommended)
+
+```bash
+npm install -g vercel
+vercel
+```
+
+After deployment, go to the Vercel dashboard and add the environment variable:
+
+- `ANTHROPIC_API_KEY`
+
+Then redeploy the project.
+
+### Other static hosts
+
+This app can be hosted on static infrastructure such as:
+
+- Netlify
+- GitHub Pages
+- S3 + CloudFront
+- Cloudflare Pages
+
+The frontend itself is static and will work on those platforms. The AI backend route is Vercel-specific and needs adaptation if deployed elsewhere.
 
 ## AI Insights setup
 
-The button on the Findings tab sends a small aggregated summary (column
-names, types, KPI values, top correlations — never your raw file) to
-`/api/ai-insights`, which adds your API key server-side and forwards the
-request to Anthropic. Without `ANTHROPIC_API_KEY` set, the button still
-appears but shows a clear, non-broken message explaining it's not
-configured — the rest of the report works normally either way.
+The button in the Findings tab sends a compact, aggregated summary of the dataset — including column names, inferred data types, KPI values, and top correlations — to the backend. It does not send raw CSV contents.
 
-For production traffic, also consider adding rate limiting (Vercel's
-Firewall rules, or a service like Upstash) and origin checking in
-`api/ai-insights.js` — this proxy validates and size-limits requests but
-doesn't rate-limit them, so a public deployment could otherwise let anyone
-run up your API bill.
+The backend function reads the `ANTHROPIC_API_KEY` environment variable and forwards the request to Anthropic securely. If the key is missing, the feature is still visible in the UI but shows a clear message explaining that it has not been configured.
 
-## The data-quality gate
+For production environments, it is recommended to add:
 
-If any cell in any column is blank, the file is rejected before any
-analysis runs — no partial preview. The rejection screen shows exactly
-which columns, how many blank cells, what percentage of rows, and a full
-scrollable log of every occurrence by row number, so you can go fix the
-source file precisely rather than guessing. `sample-with-blank-cells.csv`
-demonstrates this — it has 4 deliberate blanks across 3 columns.
+- rate limiting
+- origin validation
+- request size checks
 
-## Tests
+This proxy validates and limits request payload size, but it does not implement production-grade rate limiting by itself.
 
-```
+## Data-quality gate
+
+The app rejects files with blank values before analysis begins. This safeguard prevents partially valid data from being interpreted incorrectly.
+
+For example, `samples/sample-with-blank-cells.csv` intentionally includes blank values, and the app surfaces the exact issues with row-level diagnostic detail.
+
+This is especially useful for operational datasets where missing values can otherwise distort trend analysis or key metrics.
+
+## Testing
+
+```bash
 npm test
 ```
 
-This runs `test/blackbox.test.js` against the actual built `dist/app.min.js`
-— not the source — by simulating real browser events (filling the context
-form, uploading files, clicking through tabs) against a minimal fake DOM.
-It covers the full happy path, tab switching, clearing/reloading saved
-data, and the blank-data rejection flow end to end.
+The automated test suite runs against the actual built bundle in `dist/app.min.js`, not the source files. It simulates browser interaction with a lightweight fake DOM and validates:
 
-## On code visibility
+- happy-path uploads
+- tab switching behavior
+- state reset and reload flows
+- blank-cell rejection handling
+- end-to-end report generation
 
-Worth being direct about: nothing here stops a visitor from opening
-DevTools and reading this site's JavaScript. That isn't a limitation of
-this project specifically — it's true of every website, because the
-browser has to download and run the code to display the page at all.
-Tricks like disabling right-click or detecting DevTools don't change that;
-they're trivially bypassed and mostly just get in legitimate users' way, so
-none of that is included here.
+## Security and privacy considerations
 
-What actually matters is keeping real secrets server-side, which is why
-the Anthropic API key lives only in `api/ai-insights.js`'s environment
-variable and is never sent to the browser in any form. `dist/app.min.js`
-is minified for performance (smaller download, faster parse) via
-[Terser](https://terser.org/) — a side effect is that it's harder to
-casually read than the source, but that's a byproduct of optimization, not
-a security boundary. The `src/` files are the real, readable source, and
-that's the honest state of things.
+This project is transparent about browser-side limitations:
+
+- any visitor can inspect client-side JavaScript in DevTools
+- browser code is inherently visible to the end user
+- secrets must therefore remain server-side
+
+This is why the Anthropic API key is stored only in the backend environment variable used by `api/ai-insights.js` and is never sent to the browser.
+
+The app intentionally keeps the real source in `src/`, while the production bundle in `dist/` is minified for efficiency and performance.
+
+## Contributing
+
+Contributions are welcome for improvements to analysis logic, UI quality, accessibility, edge-case validation, or documentation clarity.
+
+If you are modifying the app, be sure to:
+
+1. update the source in `src/`
+2. rebuild with `npm run build`
+3. run the tests with `npm test`
+4. verify the report still behaves correctly with sample data
+
+## Summary
+
+Business Insights Report is a practical, no-frills analytics app for quickly understanding spreadsheet data without requiring a full business intelligence platform. It is especially useful for rapid reporting, exploratory analysis, and data-quality checks in a lightweight browser-based workflow.

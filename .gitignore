@@ -3,5 +3,7 @@ node_modules/
 .env.local
 .env*.local
 .vercel
+.vscode/
+.idea/
 *.log
 .DS_Store
